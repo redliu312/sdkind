@@ -1,0 +1,20 @@
+ingressController:
+  install: true
+
+admin:
+  enabled: true
+  http:
+    enabled: true
+    servicePort: 8001
+
+proxy:
+  type: NodePort
+  enabled: true
+  http:
+    enabled: true
+    servicePort: 80
+    containerPort: 8000
+    nodePort: 30080   # 你可以指定一個 30000~32767 之間的值
+  env:
+    - name: KONG_PROXY_LISTEN
+      value: "0.0.0.0:8000"
