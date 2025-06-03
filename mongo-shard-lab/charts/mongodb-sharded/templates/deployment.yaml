@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: mongos
 spec:
-  replicas: 1
+  replicas: 2 # Increased for high availability
   selector:
     matchLabels:
       app: mongos
@@ -14,8 +14,36 @@ spec:
     spec:
       containers:
         - name: mongos
-          image: mongo:6.0
+          image: mongo:6.0.8 # Specific version for consistency
           command: ["mongos"]
-          args: ["--configdb", "configReplSet/configsvr-0.mongodb:27017"]
+          args: ["--configdb", "configReplSet/configsvr-0.mongodb:27017,configsvr-1.mongodb:27017,configsvr-2.mongodb:27017", "--bind_ip_all"]
           ports:
             - containerPort: 27017
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            tcpSocket:
+              port: 27017
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["mongo", "--eval", "db.adminCommand('ping')"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          env: # Optional: for authentication
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-credentials
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-credentials
+                  key: password

@@ -6,9 +6,9 @@ cluster:
 delete-cluster:
 	kind delete cluster --name mongo-shard-lab
 
-deploy: cluster
+deploy:
 	helm install mongodb-sharded charts/mongodb-sharded
 
 init-sharding:
 	kubectl exec -it $(kubectl get pod -l app=mongos -o jsonpath="{.items[0].metadata.name}") -- \
-	  mongosh < /scripts/setup-sharding.js
+	  mongosh < ./scripts/setup-sharding.js
