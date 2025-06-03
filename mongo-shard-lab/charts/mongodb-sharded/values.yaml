@@ -1,0 +1,7 @@
+replicaSetName: shard1
+shards:
+  - name: shard1
+  - name: shard2
+configReplSet: configReplSet
+mongos:
+  replicas: 1
